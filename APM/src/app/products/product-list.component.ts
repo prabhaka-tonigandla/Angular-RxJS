@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
-import { Observable, Subscription } from 'rxjs';
+import { catchError, EMPTY, Observable, Subscription } from 'rxjs';
 import { ProductCategory } from '../product-categories/product-category';
 
 import { Product } from './product';
@@ -10,19 +10,23 @@ import { ProductService } from './product.service';
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.css']
 })
-export class ProductListComponent implements OnInit {
+export class ProductListComponent  {
   pageTitle = 'Product List';
   errorMessage = '';
   categories: ProductCategory[] = [];
 
-  products$: Observable<Product[]> | undefined ;
+  products$= this.productService.products$.pipe
+  (
+    catchError(err=> {
+      this.errorMessage = err;
+      return EMPTY;
+    })
+  );
   sub!: Subscription;
 
   constructor(private productService: ProductService) { }
 
-  ngOnInit(): void {
-    this.products$ = this.productService.getProducts();
-  }
+  
 
 
   onAdd(): void {
